@@ -29,15 +29,18 @@ This PrestaShop module implements middleware and controller logic for handling U
 ucpwellknown/
 ├── classes/
 │   ├── UcpHeaderValidator.php     # Header validation middleware
-│   └── UcpItemConverter.php       # Product to UCP Item converter
+│   ├── UcpItemConverter.php       # Product to UCP Item converter
+│   └── UcpOrderConverter.php      # Cart to UCP Order converter
 ├── controllers/
 │   ├── front/
 │   │   ├── ucp.php               # Well-known endpoint
 │   │   ├── api.php               # UCP API endpoint with header validation
-│   │   └── items.php             # UCP Items API endpoint
+│   │   ├── items.php             # UCP Items API endpoint
+│   │   └── orders.php            # UCP Orders API endpoint
 ├── tests/
 │   ├── UcpHeaderValidatorTest.php # Unit tests for header validation
-│   └── UcpItemConverterTest.php   # Unit tests for item conversion
+│   ├── UcpItemConverterTest.php   # Unit tests for item conversion
+│   └── UcpOrderConverterTest.php  # Unit tests for order conversion
 └── README.md
 ```
 
@@ -50,6 +53,9 @@ Access the UCP API at: `/prestashop/module/ucpwellknown/api`
 
 #### Items API
 Access the UCP Items API at: `/prestashop/module/ucpwellknown/items`
+
+#### Orders API
+Access the UCP Orders API at: `/prestashop/module/ucpwellknown/orders`
 
 ### Example Request
 
@@ -99,6 +105,46 @@ curl -X POST "http://localhost/prestashop/module/ucpwellknown/items" \
   -H "request-signature: sha256=abc123def456..." \
   -H "Content-Type: application/json" \
   -d '{"product_ids": [1, 2, 3]}'
+```
+
+### UCP Order Conversion
+
+#### Get Single Cart
+```bash
+curl -X GET "http://localhost/prestashop/module/ucpwellknown/orders?cart_id=1" \
+  -H "UCP-Agent: test-client/1.0" \
+  -H "request-id: 550e8400-e29b-41d4-a716-446655440000" \
+  -H "idempotency-key: order-12345-unique-key" \
+  -H "request-signature: sha256=abc123def456..."
+```
+
+#### Get Customer Carts
+```bash
+curl -X GET "http://localhost/prestashop/module/ucpwellknown/orders?customer_id=5&limit=10" \
+  -H "UCP-Agent: test-client/1.0" \
+  -H "request-id: 550e8400-e29b-41d4-a716-446655440000" \
+  -H "idempotency-key: order-12345-unique-key" \
+  -H "request-signature: sha256=abc123def456..."
+```
+
+#### Get Active Carts
+```bash
+curl -X GET "http://localhost/prestashop/module/ucpwellknown/orders" \
+  -H "UCP-Agent: test-client/1.0" \
+  -H "request-id: 550e8400-e29b-41d4-a716-446655440000" \
+  -H "idempotency-key: order-12345-unique-key" \
+  -H "request-signature: sha256=abc123def456..."
+```
+
+#### Batch Cart Conversion
+```bash
+curl -X POST "http://localhost/prestashop/module/ucpwellknown/orders" \
+  -H "UCP-Agent: test-client/1.0" \
+  -H "request-id: 550e8400-e29b-41d4-a716-446655440000" \
+  -H "idempotency-key: order-12345-unique-key" \
+  -H "request-signature: sha256=abc123def456..." \
+  -H "Content-Type: application/json" \
+  -d '{"cart_ids": [1, 2, 3]}'
 ```
 
 ### Valid Response
@@ -226,6 +272,174 @@ curl -X POST "http://localhost/prestashop/module/ucpwellknown/items" \
 }
 ```
 
+### UCP Order Response Example
+```json
+{
+    "status": "success",
+    "data": {
+        "id": "1",
+        "status": "active",
+        "customer": {
+            "id": "5",
+            "email": "customer@example.com",
+            "firstname": "John",
+            "lastname": "Doe",
+            "metadata": {
+                "prestashop_customer_id": 5,
+                "birthday": "1990-01-01",
+                "newsletter": true,
+                "optin": true
+            }
+        },
+        "lines": [
+            {
+                "item_id": "1",
+                "variant_id": "1",
+                "title": "T-Shirt Premium",
+                "description": "High quality cotton t-shirt",
+                "quantity": 2,
+                "unit_price": {
+                    "amount": 29.99,
+                    "currency": "EUR",
+                    "tax_exclusive": 24.99,
+                    "tax_inclusive": 29.99
+                },
+                "total_price": {
+                    "amount": 59.98,
+                    "currency": "EUR",
+                    "tax_exclusive": 49.98,
+                    "tax_inclusive": 59.98
+                },
+                "taxes": [
+                    {
+                        "name": "VAT",
+                        "rate": 20.0,
+                        "amount": 10.0
+                    }
+                ],
+                "variant": {
+                    "id": "1",
+                    "reference": "TSH001-S-BLUE",
+                    "attributes": [
+                        {
+                            "group": "Size",
+                            "name": "Small",
+                            "group_id": "1",
+                            "attribute_id": "1"
+                        },
+                        {
+                            "group": "Color",
+                            "name": "Blue",
+                            "group_id": "2",
+                            "attribute_id": "3"
+                        }
+                    ]
+                },
+                "metadata": {
+                    "prestashop_product_id": 1,
+                    "prestashop_attribute_id": 1,
+                    "reference": "TSH001-S-BLUE",
+                    "weight": 0.2
+                }
+            }
+        ],
+        "shipping": {
+            "method": "Standard Shipping",
+            "cost": {
+                "amount": 5.99,
+                "currency": "EUR",
+                "tax_exclusive": 5.00,
+                "tax_inclusive": 5.99
+            },
+            "taxes": [
+                {
+                    "name": "Shipping Tax",
+                    "rate": 20.0,
+                    "amount": 0.99
+                }
+            ],
+            "address": {
+                "street": "123 Main Street",
+                "city": "Paris",
+                "postal_code": "75001",
+                "country": "France",
+                "metadata": {
+                    "prestashop_address_id": 10,
+                    "phone": "+33123456789"
+                }
+            }
+        },
+        "discounts": [
+            {
+                "id": "1",
+                "code": "WELCOME10",
+                "name": "Welcome Discount",
+                "description": "10% off for new customers",
+                "amount": {
+                    "value": 6.60,
+                    "currency": "EUR",
+                    "type": "percentage",
+                    "percentage": 10.0
+                },
+                "metadata": {
+                    "prestashop_cart_rule_id": 1,
+                    "free_shipping": false,
+                    "minimum_amount": 50.0
+                }
+            }
+        ],
+        "totals": {
+            "subtotal": {
+                "amount": 59.98,
+                "currency": "EUR",
+                "tax_exclusive": 49.98,
+                "tax_inclusive": 59.98
+            },
+            "shipping": {
+                "amount": 5.99,
+                "currency": "EUR",
+                "tax_exclusive": 5.00,
+                "tax_inclusive": 5.99
+            },
+            "discounts": {
+                "amount": 6.60,
+                "currency": "EUR"
+            },
+            "taxes": {
+                "amount": 10.99,
+                "currency": "EUR",
+                "breakdown": {
+                    "products_tax": 10.0,
+                    "shipping_tax": 0.99,
+                    "wrapping_tax": 0.0
+                }
+            },
+            "grand_total": {
+                "amount": 59.37,
+                "currency": "EUR",
+                "tax_exclusive": 48.38,
+                "tax_inclusive": 59.37
+            }
+        },
+        "metadata": {
+            "prestashop_cart_id": 1,
+            "currency": "EUR",
+            "language": 1,
+            "created_at": "2026-03-16 09:00:00",
+            "updated_at": "2026-03-16 09:30:00",
+            "guest_mode": false,
+            "secure_key": "abc123def456789"
+        }
+    },
+    "request_info": {
+        "request_id": "550e8400-e29b-41d4-a716-446655440000",
+        "cart_id": 1,
+        "language_id": 1,
+        "timestamp": "2026-03-16T09:30:00+00:00"
+    }
+}
+```
+
 ### Error Response (Missing Headers)
 ```json
 {
@@ -294,6 +508,14 @@ Run the unit tests to validate UCP Item conversion:
 php tests/UcpItemConverterTest.php
 ```
 
+### Order Converter Tests
+
+Run the unit tests to validate UCP Order conversion:
+
+```bash
+php tests/UcpOrderConverterTest.php
+```
+
 ### Test Coverage
 
 #### Header Validation Tests
@@ -313,6 +535,14 @@ php tests/UcpItemConverterTest.php
 - Availability status checking
 - Multiple product conversion
 - Invalid product ID handling
+
+#### Order Converter Tests
+- Cart with multiple products
+- Cart with discounts
+- Cart with shipping fees
+- Cart with combinations/variants
+- Empty cart handling
+- Invalid cart handling
 
 ## Implementation Details
 
@@ -335,6 +565,17 @@ The `UcpItemConverter` class provides:
 - `getProductCombinations()`: Handles product variants/combinations
 - `formatPrice()`: Formats price with currency information
 - `getProductImages()`: Retrieves product images with URLs
+
+### UcpOrderConverter Class
+
+The `UcpOrderConverter` class provides:
+
+- `convertCartToUcpOrder()`: Converts a single PrestaShop cart to UCP Order format
+- `convertMultipleCarts()`: Converts multiple carts to UCP Orders
+- `getOrderLines()`: Extracts and formats cart products as order lines
+- `calculateTotals()`: Computes order totals with tax breakdown
+- `getShippingInfo()`: Retrieves shipping information and costs
+- `getDiscounts()`: Extracts cart rules and discounts
 
 #### UCP Item Structure
 
@@ -384,6 +625,114 @@ $ucp_item = [
 ];
 ```
 
+#### UCP Order Structure
+
+```php
+$ucp_order = [
+    'id' => (string) $cart_id,
+    'status' => 'active|converted|empty',
+    'customer' => [
+        'id' => (string) $customer_id,
+        'email' => $customer->email,
+        'firstname' => $customer->firstname,
+        'lastname' => $customer->lastname,
+        'metadata' => [...]
+    ],
+    'lines' => [
+        [
+            'item_id' => (string) $product_id,
+            'variant_id' => (string) $attribute_id,
+            'title' => $product_name,
+            'description' => $product_description,
+            'quantity' => (int) $quantity,
+            'unit_price' => [
+                'amount' => (float) $price_incl,
+                'currency' => $currency->iso_code,
+                'tax_exclusive' => (float) $price_excl,
+                'tax_inclusive' => (float) $price_incl
+            ],
+            'total_price' => [
+                'amount' => (float) $total_incl,
+                'currency' => $currency->iso_code,
+                'tax_exclusive' => (float) $total_excl,
+                'tax_inclusive' => (float) $total_incl
+            ],
+            'taxes' => [
+                [
+                    'name' => 'VAT',
+                    'rate' => (float) $tax_rate,
+                    'amount' => (float) $tax_amount
+                ]
+            ],
+            'variant' => [...], // Optional: product combination info
+            'metadata' => [...]
+        ]
+    ],
+    'shipping' => [
+        'method' => $carrier_name,
+        'cost' => [
+            'amount' => (float) $shipping_cost_incl,
+            'currency' => $currency->iso_code,
+            'tax_exclusive' => (float) $shipping_cost_excl,
+            'tax_inclusive' => (float) $shipping_cost_incl
+        ],
+        'taxes' => [...],
+        'address' => [...]
+    ],
+    'discounts' => [
+        [
+            'id' => (string) $cart_rule_id,
+            'code' => $discount_code,
+            'name' => $discount_name,
+            'amount' => [
+                'value' => (float) $discount_value,
+                'currency' => $currency->iso_code,
+                'type' => 'fixed|percentage',
+                'percentage' => (float) $percentage
+            ],
+            'metadata' => [...]
+        ]
+    ],
+    'totals' => [
+        'subtotal' => [
+            'amount' => (float) $subtotal_incl,
+            'currency' => $currency->iso_code,
+            'tax_exclusive' => (float) $subtotal_excl,
+            'tax_inclusive' => (float) $subtotal_incl
+        ],
+        'shipping' => [...],
+        'discounts' => [
+            'amount' => (float) $total_discounts,
+            'currency' => $currency->iso_code
+        ],
+        'taxes' => [
+            'amount' => (float) $total_taxes,
+            'currency' => $currency->iso_code,
+            'breakdown' => [
+                'products_tax' => (float) $products_tax,
+                'shipping_tax' => (float) $shipping_tax,
+                'wrapping_tax' => (float) $wrapping_tax
+            ]
+        ],
+        'grand_total' => [
+            'amount' => (float) $grand_total,
+            'currency' => $currency->iso_code,
+            'tax_exclusive' => (float) $grand_total_excl,
+            'tax_inclusive' => (float) $grand_total
+        ]
+    ],
+    'metadata' => [
+        'prestashop_cart_id' => (int) $cart_id,
+        'currency' => $currency->iso_code,
+        'language' => (int) $language_id,
+        'created_at' => $cart->date_add,
+        'updated_at' => $cart->date_upd,
+        'guest_mode' => (bool) $is_guest,
+        'secure_key' => $cart->secure_key
+    ]
+];
+```
+
 ### UcpWellKnownApiModuleFrontController
 
 The API controller integrates header validation with request processing:
@@ -405,6 +754,18 @@ The Items API controller handles UCP Item conversion:
 - Pagination support with `limit` and `offset` parameters
 - Language detection from `Accept-Language` header
 - Configurable combination inclusion
+
+### UcpWellKnownOrdersModuleFrontController
+
+The Orders API controller handles UCP Order conversion:
+
+- Single cart retrieval: `GET /orders?cart_id={id}`
+- Customer carts retrieval: `GET /orders?customer_id={id}`
+- Active carts retrieval: `GET /orders` (last 30 days)
+- Batch conversion: `POST /orders` with cart_ids array
+- Pagination support with `limit` and `offset` parameters
+- Language detection from `Accept-Language` header
+- Complete order totals calculation with tax breakdown
 
 ## HTTP Methods Supported
 
