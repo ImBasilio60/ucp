@@ -4,6 +4,7 @@ require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpHeaderValidator.php';
 require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpCheckoutSessionValidator.php';
 require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpCartManager.php';
 require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpBuyerManager.php';
+require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpCheckoutSessionUpdater.php';
 
 class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontController
 {
@@ -350,126 +351,48 @@ class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontCont
                 ];
             }
 
-            // Validate input structure
-            $validation_result = $this->session_validator->validateCheckoutSessionUpdate($input);
-
-            if (!$validation_result['valid']) {
-                header('HTTP/1.1 400 Bad Request');
+            // Initialize checkout session updater
+            $session_updater = new UcpCheckoutSessionUpdater();
+            
+            // Update the checkout session
+            $update_result = $session_updater->updateCheckoutSession($checkout_session_id, $input, $headers);
+            
+            if (!$update_result['success']) {
+                $code = $update_result['code'] ?? 500;
+                header("HTTP/1.1 $code " . $this->getStatusText($code));
                 return [
-                    'error' => 'Invalid request data',
-                    'code' => 400,
-                    'details' => $validation_result['errors'],
+                    'error' => $update_result['error'],
+                    'code' => $code,
+                    'details' => $update_result['details'] ?? [],
                     'timestamp' => date('c')
                 ];
             }
 
-            // Get cart from checkout session ID
-            $cart_result = $this->cart_manager->getCartByCheckoutSessionId($checkout_session_id);
-
-            if (!$cart_result['success']) {
-                header('HTTP/1.1 404 Not Found');
-                return [
-                    'error' => 'Checkout session not found',
-                    'code' => 404,
-                    'timestamp' => date('c')
-                ];
-            }
-
-            $cart_id = $cart_result['cart_id'];
-
-            // Handle promo code if provided
-            if (isset($input['promo_code'])) {
-                if (empty($input['promo_code'])) {
-                    // Remove existing promo code
-                    $remove_result = $this->cart_manager->removePromoCode($cart_id);
-                    if (!$remove_result['success']) {
-                        header('HTTP/1.1 500 Internal Server Error');
-                        return [
-                            'error' => 'Failed to remove promo code',
-                            'code' => 500,
-                            'message' => $remove_result['error'],
-                            'timestamp' => date('c')
-                        ];
-                    }
-                } else {
-                    // Validate and apply promo code
-                    $promo_validation = $this->session_validator->validatePromoCode($input['promo_code'], $cart_id);
-
-                    if (!$promo_validation['valid']) {
-                        header('HTTP/1.1 400 Bad Request');
-                        return [
-                            'error' => 'Invalid promo code',
-                            'code' => 400,
-                            'details' => $promo_validation['errors'],
-                            'timestamp' => date('c')
-                        ];
-                    }
-
-                    // Apply promo code to cart
-                    $apply_result = $this->cart_manager->applyPromoCode($cart_id, $input['promo_code']);
-
-                    if (!$apply_result['success']) {
-                        header('HTTP/1.1 500 Internal Server Error');
-                        return [
-                            'error' => 'Failed to apply promo code',
-                            'code' => 500,
-                            'message' => $apply_result['error'],
-                            'timestamp' => date('c')
-                        ];
-                    }
-                }
-            }
-
-            // Recalculate cart totals
-            $totals = $this->cart_manager->calculateCartTotals($cart_id);
-
-            // Get updated cart details
-            $cart_details = $this->cart_manager->getCartDetails($cart_id);
-
-            // Log successful checkout session update
-            PrestaShopLogger::addLog(
-                'UCP Checkout Session Updated: ' . json_encode([
-                    'checkout_id' => $checkout_session_id,
-                    'cart_id' => $cart_id,
-                    'request_id' => $headers['request-id'],
-                    'promo_code' => $input['promo_code'] ?? null
-                ]),
-                1, // Info level
-                null,
-                'UcpWellKnown',
-                0,
-                true
-            );
-
-            return [
-                'status' => 'success',
-                'checkout_id' => $checkout_session_id,
-                'cart_id' => $cart_id,
-                'items' => $cart_details['products'],
-                'subtotal' => $totals['subtotal']['amount'],
-                'discount' => $totals['discount']['amount'],
-                'total' => $totals['total']['amount'],
-                'applied_rules' => $this->cart_manager->getAppliedRules($cart_id),
-                'totals' => $totals,
-                'updated_at' => date('c'),
-                'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'idempotency_key' => $headers['idempotency-key']
-                ]
-            ];
+            return $update_result;
 
         } catch (Exception $e) {
-            PrestaShopLogger::addLog(
-                'UCP Checkout Session Update Error: ' . $e->getMessage(),
-                3, // Error level
-                null,
-                'UcpWellKnown',
-                0,
-                true
-            );
-
-            throw $e;
+            header('HTTP/1.1 500 Internal Server Error');
+            return [
+                'error' => 'Internal server error',
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'timestamp' => date('c')
+            ];
         }
+    }
+    
+    /**
+     * Get HTTP status text
+     */
+    private function getStatusText($code)
+    {
+        $status_texts = [
+            400 => 'Bad Request',
+            404 => 'Not Found',
+            500 => 'Internal Server Error'
+        ];
+        
+        return $status_texts[$code] ?? 'Error';
     }
 
     private function generateCheckoutId($cart_id)
