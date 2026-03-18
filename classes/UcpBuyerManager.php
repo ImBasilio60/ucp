@@ -393,16 +393,21 @@ class UcpBuyerManager
             $default_group = 3; // Groupe client par défaut dans PrestaShop
             $customer->id_default_group = $default_group;
 
-            // Ajouter les adresses si fournies
+            // Sauvegarder d'abord le client pour obtenir l'ID
+            if (!$customer->add()) {
+                return null;
+            }
+
+            // Créer l'adresse après la sauvegarde du client
             if (!empty($normalized_buyer['address']) && !empty($normalized_buyer['city'])) {
-                $this->createCustomerAddress($customer, $normalized_buyer);
+                $address_id = $this->createCustomerAddress($customer->id, $normalized_buyer);
+                if ($address_id) {
+                    $customer->id_address = $address_id;
+                    $customer->update();
+                }
             }
 
-            if ($customer->add()) {
-                return $customer;
-            }
-
-            return null;
+            return $customer;
 
         } catch (Exception $e) {
             // Log simple
@@ -418,12 +423,12 @@ class UcpBuyerManager
     /**
      * Créer une adresse pour le client
      */
-    private function createCustomerAddress($customer, $normalized_buyer)
+    private function createCustomerAddress($customer_id, $normalized_buyer)
     {
         try {
             $address = new Address();
 
-            $address->id_customer = $customer->id;
+            $address->id_customer = $customer_id;
             $address->firstname = $normalized_buyer['first_name'];
             $address->lastname = $normalized_buyer['last_name'];
             $address->address1 = $normalized_buyer['address'];
@@ -448,9 +453,19 @@ class UcpBuyerManager
             $address->alias = 'My Address';
 
             if ($address->add()) {
-                $customer->id_address = $address->id;
-                $customer->update();
+                // Logger la création d'adresse
+                PrestaShopLogger::addLog(
+                    'UCP Address Created: Customer ID ' . $customer_id . ', Address ID ' . $address->id,
+                    1, // Info level
+                    null,
+                    'UcpWellKnown',
+                    0,
+                    true
+                );
+                return $address->id;
             }
+
+            return null;
 
         } catch (Exception $e) {
             // Log simple
@@ -459,6 +474,7 @@ class UcpBuyerManager
                 'UCP Address Creation Error: ' . $e->getMessage() . PHP_EOL,
                 FILE_APPEND
             );
+            return null;
         }
     }
 
