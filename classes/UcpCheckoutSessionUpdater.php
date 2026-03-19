@@ -19,14 +19,14 @@ class UcpCheckoutSessionUpdater
     /**
      * Main method to update checkout session
      */
-    public function updateCheckoutSession($checkout_session_id, $update_data, $headers)
+    public function updateCheckoutSession($sid, $update_data, $headers)
     {
         try {
-            // 1. Validate checkout session ID format
-            $this->validateCheckoutSessionId($checkout_session_id);
-            
-            // 2. Get existing cart
-            $cart_result = $this->cart_manager->getCartByCheckoutSessionId($checkout_session_id);
+            // Valider l'ID de session
+            $this->validateCheckoutSessionId($sid);
+
+            // Récupérer le panier existant
+            $cart_result = $this->cart_manager->getCartByCheckoutSessionId($sid);
             if (!$cart_result['success']) {
                 return [
                     'success' => false,
@@ -58,7 +58,7 @@ class UcpCheckoutSessionUpdater
             
             return [
                 'success' => true,
-                'checkout_id' => $checkout_session_id,
+                'checkout_id' => $sid,
                 'cart_id' => $cart->id,
                 'customer_id' => $cart->id_customer,
                 'items' => $cart_details['products'],
@@ -85,13 +85,13 @@ class UcpCheckoutSessionUpdater
     /**
      * Validate checkout session ID format
      */
-    private function validateCheckoutSessionId($checkout_session_id)
+    private function validateCheckoutSessionId($sid)
     {
-        if (empty($checkout_session_id)) {
+        if (empty($sid)) {
             throw new Exception('Checkout session ID is required');
         }
         
-        if (!preg_match('/^ucs_[a-f0-9]+_\d+_\d+$/', $checkout_session_id)) {
+        if (!preg_match('/^ucs_[a-f0-9]+_\d+_\d+$/', $sid)) {
             throw new Exception('Invalid checkout session ID format');
         }
     }

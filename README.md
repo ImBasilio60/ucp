@@ -93,13 +93,13 @@ Le module UCP WellKnown permet de créer et gérer des sessions de checkout séc
 
 ### Récupérer une session
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?checkout_session_id={id}`
+**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?sid={id}`
 
 Retourne les détails complets de la session avec produits, totaux et codes promo appliqués.
 
 ### Mettre à jour une session
 **Méthode**: POST (traité comme PUT)  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?checkout_session_id={id}`
+**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?sid={id}`
 
 Permet de modifier les produits et d'appliquer/supprimer des codes promo.
 

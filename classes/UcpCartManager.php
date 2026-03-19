@@ -309,49 +309,41 @@ class UcpCartManager
         }
     }
 
-    public function getCartByCheckoutSessionId($checkout_session_id)
+    public function getCartByCheckoutSessionId($sid)
     {
-        try {
-            // Validate checkout session ID format
-            if (!preg_match('/^ucs_[a-zA-Z0-9]+_\d+_\d+$/', $checkout_session_id)) {
-                return [
-                    'success' => false,
-                    'error' => 'Invalid checkout session ID format'
-                ];
-            }
-
-            // Extract cart_id from checkout session ID
-            $parts = explode('_', $checkout_session_id);
-            if (count($parts) < 4) {
-                return [
-                    'success' => false,
-                    'error' => 'Invalid checkout session ID structure'
-                ];
-            }
-
-            $cart_id = (int)$parts[count($parts) - 2];
-
-            // Verify cart exists
-            $cart = new Cart($cart_id);
-            if (!Validate::isLoadedObject($cart)) {
-                return [
-                    'success' => false,
-                    'error' => 'Cart not found'
-                ];
-            }
-
-            return [
-                'success' => true,
-                'cart_id' => $cart_id,
-                'cart' => $cart
-            ];
-
-        } catch (Exception $e) {
+        // Valider le format de l'ID de session
+        if (!preg_match('/^ucs_[a-zA-Z0-9]+_\d+_\d+$/', $sid)) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => 'Invalid checkout session ID format'
             ];
         }
+
+        // Extract cart_id from checkout session ID
+        $parts = explode('_', $sid);
+        if (count($parts) < 4) {
+            return [
+                'success' => false,
+                'error' => 'Invalid checkout session ID structure'
+            ];
+        }
+
+        $cart_id = (int)$parts[count($parts) - 2];
+
+        // Verify cart exists
+        $cart = new Cart($cart_id);
+        if (!Validate::isLoadedObject($cart)) {
+            return [
+                'success' => false,
+                'error' => 'Cart not found'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'cart_id' => $cart_id,
+            'cart' => $cart
+        ];
     }
 
     public function applyPromoCode($cart_id, $promo_code)

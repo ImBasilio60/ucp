@@ -21,12 +21,12 @@ class UcpSessionManager
     /**
      * Créer une nouvelle session UCP temporaire
      */
-    public function createSession($checkout_session_id, $buyer_data, $line_items, $headers)
+    public function createSession($sid, $buyer_data, $line_items, $headers)
     {
-        $this->session_id = $checkout_session_id;
+        $this->session_id = $sid;
         
         $this->session_data = [
-            'checkout_session_id' => $checkout_session_id,
+            'checkout_session_id' => $sid,
             'created_at' => date('c'),
             'expires_at' => date('c', strtotime('+1 hour')),
             'status' => 'temporary',
@@ -51,9 +51,9 @@ class UcpSessionManager
     /**
      * Mettre à jour une session existante
      */
-    public function updateSession($checkout_session_id, $updates)
+    public function updateSession($sid, $updates)
     {
-        if (!$this->loadSession($checkout_session_id)) {
+        if (!$this->loadSession($sid)) {
             return false;
         }
 
@@ -91,9 +91,9 @@ class UcpSessionManager
     /**
      * Finaliser la session : créer le Cart PrestaShop
      */
-    public function finalizeSession($checkout_session_id)
+    public function finalizeSession($sid)
     {
-        if (!$this->loadSession($checkout_session_id)) {
+        if (!$this->loadSession($sid)) {
             return [
                 'success' => false,
                 'error' => 'Session not found',
@@ -160,9 +160,9 @@ class UcpSessionManager
     /**
      * Récupérer une session
      */
-    public function getSession($checkout_session_id)
+    public function getSession($sid)
     {
-        if (!$this->loadSession($checkout_session_id)) {
+        if (!$this->loadSession($sid)) {
             return null;
         }
 
@@ -635,9 +635,9 @@ class UcpSessionManager
     /**
      * Charger une session depuis le fichier
      */
-    private function loadSession($checkout_session_id)
+    private function loadSession($sid)
     {
-        $file_path = $this->storage_path . $checkout_session_id . '.json';
+        $file_path = $this->storage_path . $sid . '.json';
         
         if (!file_exists($file_path)) {
             return false;
@@ -654,7 +654,7 @@ class UcpSessionManager
             return false;
         }
 
-        $this->session_id = $checkout_session_id;
+        $this->session_id = $sid;
         $this->session_data = $data;
         return true;
     }
@@ -662,9 +662,9 @@ class UcpSessionManager
     /**
      * Supprimer une session
      */
-    public function deleteSession($checkout_session_id)
+    public function deleteSession($sid)
     {
-        $file_path = $this->storage_path . $checkout_session_id . '.json';
+        $file_path = $this->storage_path . $sid . '.json';
         if (file_exists($file_path)) {
             unlink($file_path);
             return true;

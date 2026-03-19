@@ -33,9 +33,9 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
             }
 
             // Get checkout session ID from URL
-            $checkout_session_id = $this->getCheckoutSessionId();
+            $sid = $this->getCheckoutSessionId();
             
-            if (empty($checkout_session_id)) {
+            if (empty($sid)) {
                 header('HTTP/1.1 400 Bad Request');
                 echo json_encode([
                     'error' => 'Missing checkout session ID in URL',
@@ -59,7 +59,7 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
             $input = $this->getJsonInput();
 
             // Handle finalization
-            $response = $this->handleFinalize($checkout_session_id, $input, $log_data);
+            $response = $this->handleFinalize($sid, $input, $log_data);
 
             echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
@@ -70,13 +70,13 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
         exit;
     }
 
-    private function handleFinalize($checkout_session_id, $input, $log_data)
+    private function handleFinalize($sid, $input, $log_data)
     {
         try {
             $headers = $this->validator->getExtractedHeaders();
 
             // Validate checkout session ID
-            if (empty($checkout_session_id)) {
+            if (empty($sid)) {
                 header('HTTP/1.1 400 Bad Request');
                 return [
                     'error' => 'Missing checkout session ID',
@@ -86,7 +86,7 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
             }
 
             // Finalize the session (create PrestaShop cart and customer)
-            $finalize_result = $this->session_manager->finalizeSession($checkout_session_id);
+            $finalize_result = $this->session_manager->finalizeSession($sid);
             
             if (!$finalize_result['success']) {
                 $code = $finalize_result['code'] ?? 500;
@@ -102,7 +102,7 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
             // Log successful finalization
             PrestaShopLogger::addLog(
                 'UCP Session Finalized: ' . json_encode([
-                    'checkout_id' => $checkout_session_id,
+                    'checkout_id' => $sid,
                     'cart_id' => $finalize_result['cart_id'],
                     'customer_id' => $finalize_result['customer_id'],
                     'request_id' => $headers['request-id']
@@ -116,7 +116,7 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
 
             return [
                 'status' => 'success',
-                'checkout_id' => $checkout_session_id,
+                'checkout_id' => $sid,
                 'session_type' => 'finalized',
                 'prestashop_cart_id' => $finalize_result['cart_id'],
                 'prestashop_customer_id' => $finalize_result['customer_id'],
