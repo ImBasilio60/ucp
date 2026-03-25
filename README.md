@@ -1,10 +1,10 @@
-# UCP WellKnown Module
+# UCP Module
 
 Module PrestaShop pour l'intégration du protocole UCP (Universal Commerce Protocol) avec gestion complète des sessions de paiement.
 
 ## Vue d'ensemble
 
-Le module UCP WellKnown permet de créer et gérer des sessions de checkout sécurisées avec validation des produits, gestion des clients, application de codes promo et respect complet du protocole UCP.
+Le module UCP permet de créer et gérer des sessions de checkout sécurisées avec validation des produits, gestion des clients, application de codes promo et respect complet du protocole UCP.
 
 ## Fonctionnalités principales
 
@@ -68,7 +68,7 @@ Le module UCP WellKnown permet de créer et gérer des sessions de checkout séc
 
 #### Créer une session de paiement
 **Méthode**: POST  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions`
+**URL**: `/prestashop/module/ucp/checkout_sessions`
 
 **En-têtes requis**:
 - `UCP-Agent`: Identifiant du client
@@ -128,13 +128,13 @@ Le module UCP WellKnown permet de créer et gérer des sessions de checkout séc
 
 #### Récupérer une session
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?sid={id}`
+**URL**: `/prestashop/module/ucp/checkout_sessions?sid={id}`
 
 **Réponse**: Détails complets de la session avec produits, totaux et codes promo appliqués.
 
 #### Mettre à jour une session
 **Méthode**: PUT ou POST (avec sid)  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions?sid={id}`
+**URL**: `/prestashop/module/ucp/checkout_sessions?sid={id}`
 
 **Payload**:
 ```json
@@ -194,7 +194,7 @@ Le module UCP WellKnown permet de créer et gérer des sessions de checkout séc
 
 #### Informations sur l'endpoint
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/checkout_sessions`
+**URL**: `/prestashop/module/ucp/checkout_sessions`
 
 Retourne la liste des endpoints disponibles et leurs descriptions.
 
@@ -202,7 +202,7 @@ Retourne la liste des endpoints disponibles et leurs descriptions.
 
 #### Lister tous les clients
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/buyers`
+**URL**: `/prestashop/module/ucp/buyers`
 
 **Paramètres optionnels**:
 - `limit`: Nombre de résultats (défaut: 10)
@@ -213,19 +213,19 @@ Retourne la liste des endpoints disponibles et leurs descriptions.
 
 #### Récupérer un client spécifique
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/buyers?customer_id={id}`
+**URL**: `/prestashop/module/ucp/buyers?customer_id={id}`
 
 **Paramètres optionnels**: mêmes que le listing
 
 #### Rechercher des clients
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/buyers?search={query}`
+**URL**: `/prestashop/module/ucp/buyers?search={query}`
 
 **Recherche par**: email, nom, prénom, entreprise
 
 #### Conversion en lot
 **Méthode**: POST  
-**URL**: `/prestashop/module/ucpwellknown/buyers`
+**URL**: `/prestashop/module/ucp/buyers`
 
 **Payload**:
 ```json
@@ -238,7 +238,7 @@ Retourne la liste des endpoints disponibles et leurs descriptions.
 
 #### Informations système
 **Méthode**: GET  
-**URL**: `/prestashop/module/ucpwellknown/api`
+**URL**: `/prestashop/module/ucp/api`
 
 **Réponse**:
 ```json
@@ -256,7 +256,7 @@ Retourne la liste des endpoints disponibles et leurs descriptions.
 
 #### Test POST/PUT/DELETE
 **Méthodes**: POST, PUT, DELETE  
-**URL**: `/prestashop/module/ucpwellknown/api`
+**URL**: `/prestashop/module/ucp/api`
 
 Endpoints de test pour vérifier la connectivité et la validation des en-têtes.
 
@@ -349,7 +349,7 @@ Toutes les requêtes sont loggées avec:
 ## Stockage des sessions
 
 ### Emplacement
-- Principal: `/modules/ucpwellknown/temp/sessions/`
+- Principal: `/modules/ucp/temp/sessions/`
 - Fallback: `/tmp/ucp_sessions/`
 
 ### Format des fichiers
@@ -398,14 +398,14 @@ Ajouter dans `.htaccess`:
 ```apache
 RewriteEngine on
 # Well-known
-RewriteRule ^\.well-known/ucp$ index.php?fc=module&module=ucpwellknown&controller=ucp [QSA,L]
+RewriteRule ^\.well-known/ucp$ index.php?fc=module&module=ucp&controller=ucp [QSA,L]
 ```
 
 ### Nginx
 Ajouter dans la configuration du site:
 ```nginx
 location = /.well-known/ucp {
-    rewrite ^ /index.php?fc=module&module=ucpwellknown&controller=ucp last;
+    rewrite ^ /index.php?fc=module&module=ucp&controller=ucp last;
 }
 ```
 
@@ -464,7 +464,7 @@ location = /.well-known/ucp {
 ## Intégration
 
 ### Installation
-1. Copier le module dans `/modules/ucpwellknown/`
+1. Copier le module dans `/modules/ucp/`
 2. Installer depuis l'administration PrestaShop
 3. Configurer les clés API et signatures
 4. Configurer le serveur web (Apache/Nginx)

@@ -187,7 +187,7 @@ class UcpCartManager
                 'UCP Customization Error: ' . $e->getMessage(),
                 2, // Warning level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );

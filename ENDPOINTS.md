@@ -1,4 +1,4 @@
-# UCP WellKnown - Référence des Endpoints API
+# UCP - Référence des Endpoints API
 
 ## Table des matières
 1. [Sessions de Paiement](#sessions-de-paiement-checkout_sessions)

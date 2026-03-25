@@ -120,7 +120,7 @@ class UcpHeaderValidator
             'UCP Request: ' . json_encode($log_data),
             1, // Info level
             null,
-            'UcpWellKnown',
+            'UCP',
             0,
             true
         );

@@ -4,11 +4,11 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class UcpWellKnown extends Module
+class Ucp extends Module
 {
     public function __construct()
     {
-        $this->name = 'ucpwellknown';
+        $this->name = 'ucp';
         $this->tab = 'front_office_features';
         $this->version = '1.0.0';
         $this->author = 'Basilio';
@@ -16,7 +16,7 @@ class UcpWellKnown extends Module
 
         parent::__construct();
 
-        $this->displayName = 'UCP well-known endpoint';
+        $this->displayName = 'UCP endpoint';
         $this->description = 'Expose /.well-known/ucp endpoint';
     }
 

@@ -1,12 +1,12 @@
 <?php
 
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpHeaderValidator.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpCheckoutSessionValidator.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpSessionManager.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpBuyerManager.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpCartManager.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpHeaderValidator.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpCheckoutSessionValidator.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpSessionManager.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpBuyerManager.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpCartManager.php';
 
-class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontController
+class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
 {
     public $display_header = false;
     public $display_footer = false;
@@ -190,7 +190,7 @@ class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontCont
                 ]),
                 1, // Info level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );
@@ -219,7 +219,7 @@ class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontCont
                 'UCP Checkout Session Error: ' . $e->getMessage(),
                 3, // Error level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );
@@ -367,7 +367,7 @@ class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontCont
                 ]),
                 1, // Info level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );
@@ -450,7 +450,7 @@ class Ucpwellknowncheckout_sessionsModuleFrontController extends ModuleFrontCont
                 ]),
                 1, // Info level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );

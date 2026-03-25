@@ -78,7 +78,7 @@ class UcpBuyerManager
                 'UCP Buyer Manager Error: ' . $e->getMessage(),
                 3, // Error level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );
@@ -447,7 +447,7 @@ class UcpBuyerManager
                     'UCP Address Created: Customer ID ' . $customer_id . ', Address ID ' . $address->id,
                     1, // Info level
                     null,
-                    'UcpWellKnown',
+                    'UCP',
                     0,
                     true
                 );

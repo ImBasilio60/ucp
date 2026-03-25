@@ -868,7 +868,7 @@ class UcpSessionManager
             
             // Statut de paiement (en attente)
             $order->current_state = Configuration::get('PS_OS_PREPARATION'); // En préparation
-            $order->module = 'ucpwellknown'; // Module source
+            $order->module = 'ucp'; // Module source
             $order->payment = 'UCP Payment'; // Méthode de paiement
             $order->total_paid = $cart->getOrderTotal(true);
             $order->total_paid_real = $cart->getOrderTotal(true);
@@ -939,7 +939,7 @@ class UcpSessionManager
                     'UCP Order Created: Order ID ' . $order->id . ', Reference: ' . $order->reference . ', Cart ID: ' . $cart_id . ', Customer ID: ' . $customer_id,
                     1, // Info level
                     null,
-                    'UcpWellKnown',
+                    'UCP',
                     0,
                     true
                 );

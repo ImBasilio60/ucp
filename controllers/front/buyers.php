@@ -1,9 +1,9 @@
 <?php
 
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpHeaderValidator.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpBuyerConverter.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpHeaderValidator.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpBuyerConverter.php';
 
-class UcpWellKnownBuyersModuleFrontController extends ModuleFrontController
+class UcpbuyersModuleFrontController extends ModuleFrontController
 {
     public $display_header = false;
     public $display_footer = false;

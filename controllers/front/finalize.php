@@ -1,9 +1,9 @@
 <?php
 
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpHeaderValidator.php';
-require_once _PS_MODULE_DIR_ . 'ucpwellknown/classes/UcpSessionManager.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpHeaderValidator.php';
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpSessionManager.php';
 
-class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
+class UcpfinalizeModuleFrontController extends ModuleFrontController
 {
     public $display_header = false;
     public $display_footer = false;
@@ -145,7 +145,7 @@ class UcpwellknownfinalizeModuleFrontController extends ModuleFrontController
                 ]),
                 1, // Info level
                 null,
-                'UcpWellKnown',
+                'UCP',
                 0,
                 true
             );

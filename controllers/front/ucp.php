@@ -1,6 +1,6 @@
 <?php
 
-class UcpWellKnownUcpModuleFrontController extends ModuleFrontController
+class UcpucpModuleFrontController extends ModuleFrontController
 {
     public $display_header = false;
     public $display_footer = false;

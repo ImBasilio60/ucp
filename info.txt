@@ -4,7 +4,7 @@ for apache server:
         RewriteEngine on
 
         # Well-known
-        RewriteRule ^\.well-known/ucp$ index.php?fc=module&module=ucpwellknown&controller=ucp [QSA,L]
+        RewriteRule ^\.well-known/ucp$ index.php?fc=module&module=ucp&controller=ucp [QSA,L]
     
     $ sudo systemctl restart apache2
 
@@ -16,7 +16,7 @@ for nginx server:
         # --- UCP endpoint ---
         location = /.well-known/ucp {
             # Redirige vers le contrôleur module
-            rewrite ^ /index.php?fc=module&module=ucpwellknown&controller=ucp last;
+            rewrite ^ /index.php?fc=module&module=ucp&controller=ucp last;
         }
 
     }
