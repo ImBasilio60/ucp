@@ -130,8 +130,8 @@ class UcpBuyerManager
 
         // Validation code postal (obligatoire maintenant)
         if (!empty($buyer_data['postal_code'])) {
-            if (!preg_match('/^[0-9]{4,10}$/', $buyer_data['postal_code'])) {
-                $this->errors[] = 'Postal code must contain only digits (4-10 characters)';
+            if (!preg_match('/^[0-9]{3,10}$/', $buyer_data['postal_code'])) {
+                $this->errors[] = 'Postal code must contain only digits (3-10 characters)';
             }
         }
 
