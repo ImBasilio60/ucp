@@ -148,6 +148,19 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
             // Generate unique checkout ID
             $checkout_id = $this->generateCheckoutId();
 
+            // Valider le pays AVANT de créer la session
+            try {
+                $this->validateCountry($input['buyer']['country'] ?? '');
+            } catch (Exception $e) {
+                header('HTTP/1.1 400 Bad Request');
+                return [
+                    'error' => 'Invalid country',
+                    'code' => 400,
+                    'details' => [$e->getMessage()],
+                    'timestamp' => date('c')
+                ];
+            }
+
             // Create temporary UCP session (NO PrestaShop interaction)
             try {
                 $session_data = $this->session_manager->createSession(
@@ -505,6 +518,88 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
     private function generateCheckoutId()
     {
         return 'ucs_' . uniqid() . '_' . time();
+    }
+
+    /**
+     * Valider le pays et retourner une erreur avec la liste des pays valides si invalide
+     */
+    private function validateCountry($country)
+    {
+        if (empty($country)) {
+            throw new Exception('Country is required');
+        }
+
+        $country_input = strtoupper(trim($country));
+        
+        // Essayer de trouver le pays par code ISO d'abord
+        $sql = 'SELECT id_country FROM ' . _DB_PREFIX_ . 'country WHERE iso_code = "' . pSQL($country_input) . '"';
+        $result = Db::getInstance()->getValue($sql);
+        if ($result) {
+            return true; // Pays valide
+        }
+
+        // Si non trouvé, essayer avec une table de conversion nom->ISO
+        $country_mapping = [
+            'FRANCE' => 'FR',
+            'BELGIQUE' => 'BE',
+            'SUISSE' => 'CH',
+            'ESPAGNE' => 'ES',
+            'ITALIE' => 'IT',
+            'MADAGASCAR' => 'MG',
+            'GERMANY' => 'DE',
+            'DEUTSCHLAND' => 'DE',
+            'ALLEMAGNE' => 'DE',
+            'UNITED KINGDOM' => 'GB',
+            'UK' => 'GB',
+            'ROYAUME-UNI' => 'GB',
+            'PORTUGAL' => 'PT',
+            'NETHERLANDS' => 'NL',
+            'PAYS-BAS' => 'NL',
+            'LUXEMBOURG' => 'LU',
+            'AUSTRIA' => 'AT',
+            'AUTRICHE' => 'AT',
+            'CANADA' => 'CA',
+            'CHINA' => 'CN',
+            'CHINE' => 'CN',
+            'JAPAN' => 'JP',
+            'JAPON' => 'JP',
+            'POLAND' => 'PL',
+            'POLOGNE' => 'PL',
+            'GREECE' => 'GR',
+            'GRÈCE' => 'GR',
+            'FINLAND' => 'FI',
+            'FINLANDE' => 'FI',
+            'SWEDEN' => 'SE',
+            'SUÈDE' => 'SE',
+            'DENMARK' => 'DK',
+            'DANEMARK' => 'DK',
+            'CZECH REPUBLIC' => 'CZ',
+            'RÉPUBLIQUE TCHÈQUE' => 'CZ'
+        ];
+        
+        $iso_code = $country_mapping[$country_input] ?? null;
+        if ($iso_code) {
+            $sql = 'SELECT id_country FROM ' . _DB_PREFIX_ . 'country WHERE iso_code = "' . pSQL($iso_code) . '"';
+            $result = Db::getInstance()->getValue($sql);
+            if ($result) {
+                return true; // Pays valide après conversion
+            }
+        }
+
+        // Si le pays n'est toujours pas trouvé, retourner une erreur avec la liste des pays valides
+        $sql_countries = 'SELECT iso_code FROM ' . _DB_PREFIX_ . 'country WHERE active = 1 ORDER BY iso_code';
+        $valid_countries = Db::getInstance()->executeS($sql_countries);
+        
+        $country_list = array_map(function($country) {
+            return $country['iso_code'];
+        }, $valid_countries);
+        
+        // Ajouter les noms complets supportés
+        $supported_names = array_keys($country_mapping);
+        $full_list = array_merge($country_list, $supported_names);
+        sort($full_list);
+        
+        throw new Exception('Invalid country "' . $country . '". Valid countries are: ' . implode(', ', $full_list));
     }
 
     private function getCheckoutSessionId()

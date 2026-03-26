@@ -251,14 +251,21 @@ class UcpBuyerManager
             }
 
             // 2. Créer un nouveau client
-            $new_customer = $this->createNewCustomer($normalized_buyer);
+            $new_customer_result = $this->createNewCustomer($normalized_buyer);
 
-            if (!$new_customer) {
+            if (!$new_customer_result) {
                 return [
                     'success' => false,
                     'errors' => ['Failed to create new customer']
                 ];
             }
+
+            // Vérifier si la création a échoué à cause de l'adresse
+            if (isset($new_customer_result['success']) && !$new_customer_result['success']) {
+                return $new_customer_result;
+            }
+
+            $new_customer = $new_customer_result['customer'];
 
             return [
                 'success' => true,
@@ -396,12 +403,23 @@ class UcpBuyerManager
 
             // Créer l'adresse après la sauvegarde du client
             if (!empty($normalized_buyer['address']) && !empty($normalized_buyer['city'])) {
-                $address_id = $this->createCustomerAddress($customer->id, $normalized_buyer);
-                // L'adresse est automatiquement associée au client via la méthode createCustomerAddress
-                // Pas besoin de mettre à jour customer->id_address car cette propriété n'existe pas
+                $address_result = $this->createCustomerAddress($customer->id, $normalized_buyer);
+                
+                // Vérifier si la création d'adresse a échoué
+                if (!$address_result['success']) {
+                    // Supprimer le client créé si l'adresse échoue
+                    $customer->delete();
+                    return [
+                        'success' => false,
+                        'errors' => $address_result['details'] ?? [$address_result['error']]
+                    ];
+                }
             }
 
-            return $customer;
+            return [
+                'success' => true,
+                'customer' => $customer
+            ];
 
         } catch (Exception $e) {
             error_log('UCP: Error creating new customer: ' . $e->getMessage());
@@ -426,16 +444,102 @@ class UcpBuyerManager
             $address->phone = $normalized_buyer['phone'];
             $address->company = $normalized_buyer['company'];
 
-            // Récupérer l'ID du pays (France par défaut)
-            $country_id = 8; // France
+            // Récupérer l'ID du pays avec validation stricte
+            $country_id = null;
             if (!empty($normalized_buyer['country'])) {
-                // Essayer de trouver le pays par code ISO
-                $sql = 'SELECT id_country FROM ' . _DB_PREFIX_ . 'country WHERE iso_code = "' . pSQL($normalized_buyer['country']) . '"';
+                $country_input = strtoupper(trim($normalized_buyer['country']));
+                
+                // Essayer de trouver le pays par code ISO d'abord
+                $sql = 'SELECT id_country FROM ' . _DB_PREFIX_ . 'country WHERE iso_code = "' . pSQL($country_input) . '"';
                 $result = Db::getInstance()->getValue($sql);
                 if ($result) {
                     $country_id = $result;
+                } else {
+                    // Si non trouvé, essayer avec une table de conversion nom->ISO
+                    $country_mapping = [
+                        'FRANCE' => 'FR',
+                        'BELGIQUE' => 'BE',
+                        'SUISSE' => 'CH',
+                        'ESPAGNE' => 'ES',
+                        'ITALIE' => 'IT',
+                        'MADAGASCAR' => 'MG',
+                        'GERMANY' => 'DE',
+                        'DEUTSCHLAND' => 'DE',
+                        'ALLEMAGNE' => 'DE',
+                        'UNITED KINGDOM' => 'GB',
+                        'UK' => 'GB',
+                        'ROYAUME-UNI' => 'GB',
+                        'PORTUGAL' => 'PT',
+                        'NETHERLANDS' => 'NL',
+                        'PAYS-BAS' => 'NL',
+                        'LUXEMBOURG' => 'LU',
+                        'AUSTRIA' => 'AT',
+                        'AUTRICHE' => 'AT',
+                        'CANADA' => 'CA',
+                        'CHINA' => 'CN',
+                        'CHINE' => 'CN',
+                        'JAPAN' => 'JP',
+                        'JAPON' => 'JP',
+                        'POLAND' => 'PL',
+                        'POLOGNE' => 'PL',
+                        'GREECE' => 'GR',
+                        'GRÈCE' => 'GR',
+                        'FINLAND' => 'FI',
+                        'FINLANDE' => 'FI',
+                        'SWEDEN' => 'SE',
+                        'SUÈDE' => 'SE',
+                        'DENMARK' => 'DK',
+                        'DANEMARK' => 'DK',
+                        'CZECH REPUBLIC' => 'CZ',
+                        'RÉPUBLIQUE TCHÈQUE' => 'CZ'
+                    ];
+                    
+                    $iso_code = $country_mapping[$country_input] ?? null;
+                    if ($iso_code) {
+                        $sql = 'SELECT id_country FROM ' . _DB_PREFIX_ . 'country WHERE iso_code = "' . pSQL($iso_code) . '"';
+                        $result = Db::getInstance()->getValue($sql);
+                        if ($result) {
+                            $country_id = $result;
+                        }
+                    }
                 }
+                
+                // Si le pays n'est toujours pas trouvé, retourner une erreur avec la liste des pays valides
+                if (!$country_id) {
+                    // Récupérer la liste de tous les pays valides
+                    $sql_countries = 'SELECT iso_code FROM ' . _DB_PREFIX_ . 'country WHERE active = 1 ORDER BY iso_code';
+                    $valid_countries = Db::getInstance()->executeS($sql_countries);
+                    
+                    $country_list = array_map(function($country) {
+                        return $country['iso_code'];
+                    }, $valid_countries);
+                    
+                    // Ajouter les noms complets supportés
+                    $supported_names = array_keys($country_mapping);
+                    $full_list = array_merge($country_list, $supported_names);
+                    sort($full_list);
+                    
+                    // Retourner une erreur structurée
+                    return [
+                        'success' => false,
+                        'error' => 'Invalid country',
+                        'code' => 400,
+                        'details' => [
+                            'Invalid country "' . $normalized_buyer['country'] . '". Valid countries are: ' . implode(', ', $full_list)
+                        ]
+                    ];
+                }
+            } else {
+                return [
+                    'success' => false,
+                    'error' => 'Missing country',
+                    'code' => 400,
+                    'details' => [
+                        'Country is required'
+                    ]
+                ];
             }
+            
             $address->id_country = $country_id;
 
             // Définir comme adresse par défaut
@@ -451,10 +555,10 @@ class UcpBuyerManager
                     0,
                     true
                 );
-                return $address->id;
+                return ['success' => true, 'address_id' => $address->id];
             }
 
-            return null;
+            return ['success' => false, 'error' => 'Failed to create address'];
 
         } catch (Exception $e) {
             // Log simple
@@ -463,7 +567,7 @@ class UcpBuyerManager
                 'UCP Address Creation Error: ' . $e->getMessage() . PHP_EOL,
                 FILE_APPEND
             );
-            return null;
+            return ['success' => false, 'error' => 'Address creation error: ' . $e->getMessage()];
         }
     }
 
