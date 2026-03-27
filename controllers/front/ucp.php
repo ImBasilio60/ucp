@@ -20,8 +20,8 @@ class UcpucpModuleFrontController extends ModuleFrontController
                         [
                             "version" => "2026-03-13",
                             "spec" => "https://ucp.dev/specification/overview/",
-                            "transport" => "mcp",
-                            "endpoint" => "https://www.passioncampagne9.projets-omega.net/api/ucp/mcp",
+                            "transport" => "rest",
+                            "endpoint" => "https://www.passioncampagne9.projets-omega.net/module/ucp",
                             "schema" => "https://ucp.dev/services/shopping/openrpc.json"
                         ]
                     ]
