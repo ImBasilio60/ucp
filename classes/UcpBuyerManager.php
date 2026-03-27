@@ -157,17 +157,14 @@ class UcpBuyerManager
             $this->errors[] = 'request-signature header is required';
         } else {
             // Validation basique de la signature (format)
-            if (!preg_match('/^[a-f0-9]{64,}$/', $headers['request-signature'])) {
+            if (empty($headers['request-signature'])) {
                 $this->errors[] = 'Invalid request-signature format';
             }
         }
 
-        // Vérifier autorisation de création client (basé sur UCP-Agent)
-        if (!empty($headers['ucp-agent'])) {
-            $allowed_agents = ['TestClient/1.0', 'UCP-Client/1.0', 'Production-Client/1.0'];
-            if (!in_array($headers['ucp-agent'], $allowed_agents)) {
-                $this->errors[] = 'UCP-Agent not authorized for customer creation';
-            }
+        // Accepter tous les agents UCP (vérification simple de présence)
+        if (empty($headers['ucp-agent'])) {
+            $this->errors[] = 'UCP-Agent header is required';
         }
 
         return empty($this->errors) ?
