@@ -14,7 +14,7 @@ class UcpucpModuleFrontController extends ModuleFrontController
 
         $json = [
             "ucp" => [
-                "version" => "2026-03-13",
+                "version" => "2026-01-11",
                 "signing_keys" => [
                     "keys" => [
                         [
