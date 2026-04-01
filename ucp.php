@@ -63,4 +63,11 @@ class Ucp extends Module
         
         return parent::uninstall();
     }
+
+    public function hookModuleRoutes($params)
+    {
+        // This hook is used to register custom routes for the module
+        // Currently handled by Apache/Nginx rewrite rules
+        return [];
+    }
 }
