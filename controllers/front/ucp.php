@@ -28,12 +28,16 @@ class UcpucpModuleFrontController extends ModuleFrontController
                 ],
                 "services" => [
                     "dev.ucp.shopping" => [
-                        [
-                            "version" => "2026-03-13",
-                            "spec" => "https://ucp.dev/specification/overview/",
-                            "transport" => "rest",
-                            "endpoint" => "https://www.passioncampagne9.projets-omega.net/module/ucp",
-                            "schema" => "https://ucp.dev/services/shopping/openrpc.json"
+                        "version" => "2026-03-13",
+                        "spec" => "https://ucp.dev/specification/overview/",
+                        "transport" => [
+                            "rest" => [
+                                "endpoint" => "https://www.passioncampagne9.projets-omega.net/module/ucp",
+                                "schema" => "https://ucp.dev/services/shopping/openrpc.json"
+                            ]
+                        ],
+                        "capabilities" => [
+                            "dev.ucp.shopping.checkout"
                         ]
                     ]
                 ],
