@@ -25,7 +25,8 @@ class UcpfinalizeModuleFrontController extends ModuleFrontController
         try {
             // Extract and validate UCP headers
             $this->validator->extractHeaders();
-            $validation = $this->validator->validateHeaders();
+            $endpoint = $this->getEndpointPath();
+            $validation = $this->validator->validateHeaders($endpoint);
 
             if (!$validation['valid']) {
                 $this->validator->sendErrorResponse($validation['errors']);

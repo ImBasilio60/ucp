@@ -9,9 +9,20 @@ class UcpucpModuleFrontController extends ModuleFrontController
     {
         header('Content-Type: application/json');
 
+        // Get public key from configuration
+        $publicKey = Configuration::get('UCP_PUBLIC_KEY');
+
         $json = [
             "ucp" => [
                 "version" => "2026-03-13",
+                "signing_keys" => [
+                    "keys" => [
+                        [
+                            "alg" => "RS256",
+                            "key" => $publicKey ?: ""
+                        ]
+                    ]
+                ],
                 "supported_versions" => [
                     "2026-03-13" => "https://www.passioncampagne9.projets-omega.net/.well-known/ucp"
                 ],

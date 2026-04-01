@@ -13,6 +13,11 @@ class UcpHeaderValidator
         'request-signature'
     ];
 
+    private $optional_headers = [
+        'idempotency-key',
+        'request-signature'
+    ];
+
     private $extracted_headers = [];
 
     public function extractHeaders()
@@ -49,13 +54,16 @@ class UcpHeaderValidator
         return null;
     }
 
-    public function validateHeaders()
+    public function validateHeaders($endpoint = null)
     {
         $errors = [];
         $headers = $this->extracted_headers;
 
+        // Determine which headers are required based on endpoint
+        $required_for_endpoint = $this->getRequiredHeadersForEndpoint($endpoint);
+
         // Check for missing required headers
-        foreach ($this->required_headers as $header) {
+        foreach ($required_for_endpoint as $header) {
             $key = strtolower($header);
             if (!isset($headers[$key]) || empty($headers[$key])) {
                 $errors[] = [
@@ -91,6 +99,18 @@ class UcpHeaderValidator
             'valid' => empty($errors),
             'errors' => $errors
         ];
+    }
+
+    private function getRequiredHeadersForEndpoint($endpoint)
+    {
+        // For catalogue search endpoints, only UCP-Agent is required
+        // request-id is optional but recommended for logging
+        if ($endpoint && strpos($endpoint, 'items') !== false && isset($_GET['search'])) {
+            return ['UCP-Agent'];
+        }
+
+        // For all other endpoints, all headers are required
+        return $this->required_headers;
     }
 
     private function isValidUUID($uuid)
