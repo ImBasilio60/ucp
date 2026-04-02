@@ -6,6 +6,88 @@ if (!defined('_PS_VERSION_')) {
 
 class UcpCheckoutSessionValidator
 {
+    /**
+     * List of valid ISO 3166-1 alpha-2 country codes
+     */
+    private $valid_countries = [
+        'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ',
+        'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'MK', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW'
+    ];
+
+    /**
+     * Common countries for better user experience
+     */
+    private $common_countries = [
+        'US' => 'United States',
+        'CA' => 'Canada',
+        'GB' => 'United Kingdom',
+        'FR' => 'France',
+        'DE' => 'Germany',
+        'IT' => 'Italy',
+        'ES' => 'Spain',
+        'AU' => 'Australia',
+        'JP' => 'Japan',
+        'CN' => 'China',
+        'IN' => 'India',
+        'BR' => 'Brazil',
+        'MX' => 'Mexico',
+        'NL' => 'Netherlands',
+        'BE' => 'Belgium',
+        'CH' => 'Switzerland',
+        'AT' => 'Austria',
+        'SE' => 'Sweden',
+        'NO' => 'Norway',
+        'DK' => 'Denmark',
+        'FI' => 'Finland',
+        'PL' => 'Poland',
+        'CZ' => 'Czech Republic',
+        'PT' => 'Portugal',
+        'IE' => 'Ireland',
+        'GR' => 'Greece',
+        'RU' => 'Russia'
+    ];
+
+    /**
+     * Validates if a country code is a valid ISO 3166-1 alpha-2 code
+     * 
+     * @param string $country Country code to validate
+     * @return bool True if valid, false otherwise
+     */
+    public function isValidCountry($country)
+    {
+        if (empty($country) || !is_string($country)) {
+            return false;
+        }
+        
+        $country = strtoupper(trim($country));
+        return in_array($country, $this->valid_countries);
+    }
+
+    /**
+     * Gets the country name for a valid country code
+     * 
+     * @param string $country Country code
+     * @return string|null Country name or null if not found
+     */
+    public function getCountryName($country)
+    {
+        if (empty($country) || !is_string($country)) {
+            return null;
+        }
+        
+        $country = strtoupper(trim($country));
+        return isset($this->common_countries[$country]) ? $this->common_countries[$country] : null;
+    }
+
+    /**
+     * Gets list of common countries for UI purposes
+     * 
+     * @return array Array of country codes and names
+     */
+    public function getCommonCountries()
+    {
+        return $this->common_countries;
+    }
     public function validateCheckoutSessionRequest($input)
     {
         $errors = [];
@@ -257,10 +339,112 @@ class UcpCheckoutSessionValidator
             ];
         }
 
+        // Validate country if provided
+        if (isset($validated_buyer['country'])) {
+            if (!$this->isValidCountry($validated_buyer['country'])) {
+                $errors[] = [
+                    'field' => 'buyer.country',
+                    'message' => 'Invalid country code. Must be a valid ISO 3166-1 alpha-2 country code (e.g., US, FR, DE, etc.)'
+                ];
+            }
+        }
+
         return [
             'valid' => empty($errors),
             'errors' => $errors,
             'buyer' => $validated_buyer
+        ];
+    }
+
+    /**
+     * Validates a complete address structure
+     * 
+     * @param array $address Address data to validate
+     * @return array Validation result with valid status, errors, and normalized address
+     */
+    public function validateAddress($address)
+    {
+        $errors = [];
+        $validated_address = [];
+
+        if (!is_array($address)) {
+            return [
+                'valid' => false,
+                'errors' => [['field' => 'address', 'message' => 'address must be an object']],
+                'address' => []
+            ];
+        }
+
+        // Validate required address fields
+        $required_fields = ['country'];
+        foreach ($required_fields as $field) {
+            if (!isset($address[$field]) || empty(trim($address[$field]))) {
+                $errors[] = [
+                    'field' => 'address.' . $field,
+                    'message' => 'Missing required field: ' . $field
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return ['valid' => false, 'errors' => $errors, 'address' => []];
+        }
+
+        // Validate country (required field)
+        $country = strtoupper(trim($address['country']));
+        if (!$this->isValidCountry($country)) {
+            $errors[] = [
+                'field' => 'address.country',
+                'message' => 'Invalid country code. Must be a valid ISO 3166-1 alpha-2 country code (e.g., US, FR, DE, etc.)'
+            ];
+        } else {
+            $validated_address['country'] = $country;
+            $validated_address['country_name'] = $this->getCountryName($country);
+        }
+
+        // Validate optional address fields
+        $optional_fields = ['address_line1', 'address_line2', 'city', 'state', 'postal_code'];
+        foreach ($optional_fields as $field) {
+            if (isset($address[$field]) && !empty(trim($address[$field]))) {
+                $value = trim($address[$field]);
+                
+                // Additional validation for specific fields
+                switch ($field) {
+                    case 'postal_code':
+                        // Basic postal code validation (alphanumeric, 3-10 characters)
+                        if (!preg_match('/^[A-Za-z0-9\s\-]{3,10}$/', $value)) {
+                            $errors[] = [
+                                'field' => 'address.postal_code',
+                                'message' => 'Invalid postal code format'
+                            ];
+                        } else {
+                            $validated_address[$field] = $value;
+                        }
+                        break;
+                        
+                    case 'city':
+                        // City name validation (letters, spaces, hyphens, 2-50 characters)
+                        if (!preg_match('/^[A-Za-z\s\-]{2,50}$/', $value)) {
+                            $errors[] = [
+                                'field' => 'address.city',
+                                'message' => 'Invalid city name format'
+                            ];
+                        } else {
+                            $validated_address[$field] = $value;
+                        }
+                        break;
+                        
+                    default:
+                        $validated_address[$field] = $value;
+                        break;
+                }
+            }
+        }
+
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+            'address' => $validated_address
         ];
     }
 
