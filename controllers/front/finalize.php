@@ -62,9 +62,14 @@ class UcpfinalizeModuleFrontController extends ModuleFrontController
             // Handle finalization
             $response = $this->handleFinalize($sid, $input, $log_data);
 
+            // Record successful request
+            $this->validator->recordSuccess();
+
             echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         } catch (Exception $e) {
+            // Record 500 error
+            $this->validator->recordError500();
             $this->sendServerError($e->getMessage());
         }
 

@@ -4,6 +4,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpMetricsCollector.php';
+
 class UcpHeaderValidator
 {
     private $required_headers = [
@@ -19,6 +21,12 @@ class UcpHeaderValidator
     ];
 
     private $extracted_headers = [];
+    private $metrics_collector;
+
+    public function __construct()
+    {
+        $this->metrics_collector = new UcpMetricsCollector();
+    }
 
     public function extractHeaders()
     {
@@ -172,6 +180,9 @@ class UcpHeaderValidator
 
     public function sendErrorResponse($errors)
     {
+        // Record 400 error metric
+        $this->metrics_collector->recordError400();
+        
         header('Content-Type: application/json');
         header('HTTP/1.1 400 Bad Request');
 
@@ -223,11 +234,30 @@ class UcpHeaderValidator
      */
     public function sendContentTypeErrorResponse($error)
     {
+        // Record 400 error metric
+        $this->metrics_collector->recordError400();
+        
         header('Content-Type: application/json');
         header('HTTP/1.1 400 Bad Request');
 
         echo json_encode($error, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         exit;
+    }
+
+    /**
+     * Record a successful request
+     */
+    public function recordSuccess()
+    {
+        $this->metrics_collector->recordSuccess();
+    }
+
+    /**
+     * Record a 500 error
+     */
+    public function recordError500()
+    {
+        $this->metrics_collector->recordError500();
     }
 
     public function getExtractedHeaders()

@@ -46,9 +46,14 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             $method = $_SERVER['REQUEST_METHOD'];
             $response = $this->processRequest($method, $log_data);
 
+            // Record successful request
+            $this->validator->recordSuccess();
+
             echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         } catch (Exception $e) {
+            // Record 500 error
+            $this->validator->recordError500();
             $this->sendServerError($e->getMessage());
         }
 
