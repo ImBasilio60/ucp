@@ -127,7 +127,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $ucp_item,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'product_id' => $product_id,
                     'language_id' => $language_id,
                     'include_combinations' => $include_combinations,
@@ -140,7 +140,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Product not found',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -194,7 +194,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                         'offset' => $offset
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
+                        'request_id' => $headers['request-id'] ?? 'unknown',
                         'category_id' => $category_id,
                         'timestamp' => $log_data['timestamp']
                     ]
@@ -213,7 +213,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                     'offset' => $offset
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'category_id' => $category_id,
                     'language_id' => $language_id,
                     'include_combinations' => $include_combinations,
@@ -226,7 +226,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Category processing error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -277,7 +277,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                         'total_results' => $total
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
+                        'request_id' => $headers['request-id'] ?? 'unknown',
                         'timestamp' => $log_data['timestamp']
                     ]
                 ];
@@ -294,7 +294,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                     'total_results' => $total
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'language_id' => $language_id,
                     'include_combinations' => $include_combinations,
                     'timestamp' => $log_data['timestamp']
@@ -306,7 +306,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Search error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -355,7 +355,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                         'offset' => $offset
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
+                        'request_id' => $headers['request-id'] ?? 'unknown',
                         'timestamp' => $log_data['timestamp']
                     ]
                 ];
@@ -373,7 +373,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                     'offset' => $offset
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'language_id' => $language_id,
                     'include_combinations' => $include_combinations,
                     'timestamp' => $log_data['timestamp']
@@ -385,7 +385,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Product list error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -407,7 +407,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                 return [
                     'error' => 'Invalid product IDs',
                     'message' => 'No valid product IDs provided',
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'timestamp' => date('c')
                 ];
             }
@@ -418,7 +418,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $ucp_items,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'requested_ids' => $product_ids,
                     'converted_ids' => array_column($ucp_items, 'id'),
                     'language_id' => $language_id,
@@ -432,7 +432,7 @@ class UcpitemsModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Batch conversion error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
