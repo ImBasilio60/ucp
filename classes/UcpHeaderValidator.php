@@ -186,6 +186,50 @@ class UcpHeaderValidator
         exit;
     }
 
+    /**
+     * Validates Content-Type header for transactional endpoints
+     * 
+     * @return array Validation result with valid status and error details
+     */
+    public function validateContentType()
+    {
+        $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+        
+        // Handle cases where Content-Type might include charset
+        $content_type = strtolower(trim($content_type));
+        $content_type = explode(';', $content_type)[0]; // Remove charset if present
+        
+        if ($content_type !== 'application/json') {
+            return [
+                'valid' => false,
+                'error' => [
+                    'error' => 'Invalid Content-Type',
+                    'code' => 400,
+                    'message' => 'Content-Type must be application/json for transactional endpoints',
+                    'received' => $content_type ?: 'not provided',
+                    'expected' => 'application/json',
+                    'timestamp' => date('c')
+                ]
+            ];
+        }
+        
+        return ['valid' => true];
+    }
+
+    /**
+     * Sends Content-Type validation error response
+     * 
+     * @param array $error Error details from validateContentType
+     */
+    public function sendContentTypeErrorResponse($error)
+    {
+        header('Content-Type: application/json');
+        header('HTTP/1.1 400 Bad Request');
+
+        echo json_encode($error, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     public function getExtractedHeaders()
     {
         return $this->extracted_headers;

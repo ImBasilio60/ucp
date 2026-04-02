@@ -23,6 +23,13 @@ class UcpordersModuleFrontController extends ModuleFrontController
         header('Content-Type: application/json');
 
         try {
+            // Validate Content-Type for transactional endpoint
+            $content_type_validation = $this->validator->validateContentType();
+            if (!$content_type_validation['valid']) {
+                $this->validator->sendContentTypeErrorResponse($content_type_validation['error']);
+                return;
+            }
+
             // Extract and validate UCP headers
             $this->validator->extractHeaders();
             $endpoint = $this->getEndpointPath();
