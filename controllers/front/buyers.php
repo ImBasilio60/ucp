@@ -141,7 +141,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                 return [
                     'error' => 'Customer not found',
                     'message' => "Customer with ID $customer_id not found",
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'timestamp' => date('c')
                 ];
             }
@@ -150,11 +150,11 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $buyer,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'customer_id' => $customer_id,
                     'language_id' => $language_id,
                     'anonymized' => $anonymize,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -163,7 +163,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Customer processing error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -207,8 +207,8 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                         'offset' => $offset
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
-                        'timestamp' => $log_data['timestamp']
+                        'request_id' => $headers['request-id'] ?? 'unknown',
+                        'timestamp' => $log_data['timestamp'] ?? date('c')
                     ]
                 ];
             }
@@ -231,10 +231,10 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                     'offset' => $offset
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'language_id' => $language_id,
                     'anonymized' => $anonymize,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -243,7 +243,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Customers list error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -276,10 +276,10 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                     'total_results' => count($buyers)
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'language_id' => $language_id,
                     'anonymized' => $anonymize,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -288,7 +288,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Customer search error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -310,7 +310,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                 return [
                     'error' => 'Invalid customer IDs',
                     'message' => 'No valid customer IDs provided',
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'timestamp' => date('c')
                 ];
             }
@@ -328,12 +328,12 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $buyers,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'requested_ids' => $customer_ids,
                     'converted_ids' => array_column($buyers, 'id'),
                     'language_id' => $language_id,
                     'anonymized' => $anonymize,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -342,7 +342,7 @@ class UcpbuyersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Batch conversion error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }

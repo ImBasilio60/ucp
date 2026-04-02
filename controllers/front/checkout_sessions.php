@@ -205,8 +205,8 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
             PrestaShopLogger::addLog(
                 'UCP Temporary Session Created: ' . json_encode([
                     'checkout_id' => $checkout_id,
-                    'request_id' => $headers['request-id'],
-                    'items_count' => count($input['line_items']),
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'items_count' => isset($input['line_items']) ? count($input['line_items']) : 0,
                     'status' => 'temporary'
                 ]),
                 1, // Info level
@@ -226,8 +226,8 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
                 'created_at' => $session_data['created_at'],
                 'expires_at' => $session_data['expires_at'],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'idempotency_key' => $headers['idempotency-key']
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'idempotency_key' => $headers['idempotency-key'] ?? 'unknown'
                 ],
                 'next_steps' => [
                     'modify_session' => 'PUT /checkout_sessions?sid=' . $checkout_id,
@@ -282,9 +282,9 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
                 'prestashop_customer_id' => $session_data['prestashop_customer_id'],
                 'finalized' => $session_data['finalized'],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'ucp_agent' => $headers['ucp-agent'],
-                    'timestamp' => $log_data['timestamp']
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ],
                 'next_steps' => $session_data['finalized'] ? [] : [
                     'modify_session' => 'PUT /checkout_sessions?sid=' . $sid,
@@ -298,10 +298,10 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
             'status' => 'success',
             'message' => 'UCP Checkout Sessions endpoint',
             'request_info' => [
-                'request_id' => $headers['request-id'],
-                'ucp_agent' => $headers['ucp-agent'],
-                'idempotency_key' => $headers['idempotency-key'],
-                'timestamp' => $log_data['timestamp']
+                'request_id' => $headers['request-id'] ?? 'unknown',
+                'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                'idempotency_key' => $headers['idempotency-key'] ?? 'unknown',
+                'timestamp' => $log_data['timestamp'] ?? date('c')
             ],
             'endpoints' => [
                 'POST /checkout-sessions' => 'Create a new temporary checkout session',
@@ -405,9 +405,9 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
                 'finalized_at' => $finalize_result['session_data']['finalized_at'],
                 'message' => 'Session finalized successfully. ' . ($finalize_result['order_created'] ? 'PrestaShop cart and order created.' : 'PrestaShop cart created, order creation failed.'),
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'ucp_agent' => $headers['ucp-agent'],
-                    'timestamp' => $log_data['timestamp']
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -466,8 +466,8 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
             PrestaShopLogger::addLog(
                 'UCP Temporary Session Updated: ' . json_encode([
                     'checkout_id' => $sid,
-                    'request_id' => $headers['request-id'],
-                    'items_count' => count($session_data['line_items'])
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'items_count' => isset($session_data['line_items']) ? count($session_data['line_items']) : 0
                 ]),
                 1, // Info level
                 null,
@@ -487,9 +487,9 @@ class Ucpcheckout_sessionsModuleFrontController extends ModuleFrontController
                 'updated_at' => $session_data['updated_at'] ?? $session_data['created_at'],
                 'expires_at' => $session_data['expires_at'],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'ucp_agent' => $headers['ucp-agent'],
-                    'timestamp' => $log_data['timestamp']
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ],
                 'next_steps' => [
                     'modify_session' => 'PUT /checkout_sessions?sid=' . $sid,

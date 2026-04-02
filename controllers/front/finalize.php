@@ -160,9 +160,9 @@ class UcpfinalizeModuleFrontController extends ModuleFrontController
                 'finalized_at' => $finalize_result['session_data']['finalized_at'],
                 'message' => 'Session finalized successfully. PrestaShop cart created.',
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
-                    'ucp_agent' => $headers['ucp-agent'],
-                    'timestamp' => $log_data['timestamp']
+                    'request_id' => $headers['request-id'] ?? 'unknown',
+                    'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 

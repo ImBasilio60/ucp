@@ -95,10 +95,10 @@ class UcpapiModuleFrontController extends ModuleFrontController
             'status' => 'success',
             'message' => 'UCP API endpoint',
             'request_info' => [
-                'request_id' => $headers['request-id'],
-                'ucp_agent' => $headers['ucp-agent'],
-                'idempotency_key' => $headers['idempotency-key'],
-                'timestamp' => $log_data['timestamp']
+                'request_id' => $headers['request-id'] ?? 'unknown',
+                'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
+                'idempotency_key' => $headers['idempotency-key'] ?? 'unknown',
+                'timestamp' => $log_data['timestamp'] ?? date('c')
             ],
             'server_info' => [
                 'ucp_version' => '2026-03-13',
@@ -114,8 +114,8 @@ class UcpapiModuleFrontController extends ModuleFrontController
         return [
             'status' => 'success',
             'message' => 'UCP POST request processed',
-            'request_id' => $headers['request-id'],
-            'idempotency_key' => $headers['idempotency-key'],
+            'request_id' => $headers['request-id'] ?? 'unknown',
+            'idempotency_key' => $headers['idempotency-key'] ?? 'unknown',
             'processed_data' => $input,
             'timestamp' => date('c')
         ];
@@ -127,8 +127,8 @@ class UcpapiModuleFrontController extends ModuleFrontController
         return [
             'status' => 'success',
             'message' => 'UCP PUT request processed',
-            'request_id' => $headers['request-id'],
-            'idempotency_key' => $headers['idempotency-key'],
+            'request_id' => $headers['request-id'] ?? 'unknown',
+            'idempotency_key' => $headers['idempotency-key'] ?? 'unknown',
             'updated_data' => $input,
             'timestamp' => date('c')
         ];
@@ -140,8 +140,8 @@ class UcpapiModuleFrontController extends ModuleFrontController
         return [
             'status' => 'success',
             'message' => 'UCP DELETE request processed',
-            'request_id' => $headers['request-id'],
-            'idempotency_key' => $headers['idempotency-key'],
+            'request_id' => $headers['request-id'] ?? 'unknown',
+            'idempotency_key' => $headers['idempotency-key'] ?? 'unknown',
             'timestamp' => date('c')
         ];
     }

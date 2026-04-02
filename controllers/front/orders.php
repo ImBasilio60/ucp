@@ -133,7 +133,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
                 return [
                     'error' => 'Cart not found',
                     'message' => "Cart with ID $cart_id not found",
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'timestamp' => date('c')
                 ];
             }
@@ -144,10 +144,10 @@ class UcpordersModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $ucp_order,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'cart_id' => $cart_id,
                     'language_id' => $language_id,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -156,7 +156,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Cart processing error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -191,9 +191,9 @@ class UcpordersModuleFrontController extends ModuleFrontController
                         'offset' => $offset
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
+                        'request_id' => $headers['request-id'] ?? 'unknown',
                         'customer_id' => $customer_id,
-                        'timestamp' => $log_data['timestamp']
+                        'timestamp' => $log_data['timestamp'] ?? date('c')
                     ]
                 ];
             }
@@ -209,10 +209,10 @@ class UcpordersModuleFrontController extends ModuleFrontController
                     'offset' => $offset
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'customer_id' => $customer_id,
                     'language_id' => $language_id,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -221,7 +221,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Customer carts error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -257,8 +257,8 @@ class UcpordersModuleFrontController extends ModuleFrontController
                         'offset' => $offset
                     ],
                     'request_info' => [
-                        'request_id' => $headers['request-id'],
-                        'timestamp' => $log_data['timestamp']
+                        'request_id' => $headers['request-id'] ?? 'unknown',
+                        'timestamp' => $log_data['timestamp'] ?? date('c')
                     ]
                 ];
             }
@@ -274,9 +274,9 @@ class UcpordersModuleFrontController extends ModuleFrontController
                     'offset' => $offset
                 ],
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'language_id' => $language_id,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -285,7 +285,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Active carts error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }
@@ -306,7 +306,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
                 return [
                     'error' => 'Invalid cart IDs',
                     'message' => 'No valid cart IDs provided',
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'timestamp' => date('c')
                 ];
             }
@@ -317,13 +317,13 @@ class UcpordersModuleFrontController extends ModuleFrontController
                 'status' => 'success',
                 'data' => $ucp_orders,
                 'request_info' => [
-                    'request_id' => $headers['request-id'],
+                    'request_id' => $headers['request-id'] ?? 'unknown',
                     'requested_ids' => $cart_ids,
                     'converted_ids' => array_column($ucp_orders, function($order) {
                         return $order['metadata']['prestashop_cart_id'];
                     }),
                     'language_id' => $language_id,
-                    'timestamp' => $log_data['timestamp']
+                    'timestamp' => $log_data['timestamp'] ?? date('c')
                 ]
             ];
 
@@ -332,7 +332,7 @@ class UcpordersModuleFrontController extends ModuleFrontController
             return [
                 'error' => 'Batch conversion error',
                 'message' => $e->getMessage(),
-                'request_id' => $headers['request-id'],
+                'request_id' => $headers['request-id'] ?? 'unknown',
                 'timestamp' => date('c')
             ];
         }

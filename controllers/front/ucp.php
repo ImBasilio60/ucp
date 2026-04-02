@@ -7,7 +7,11 @@ class UcpucpModuleFrontController extends ModuleFrontController
 
     public function initContent()
     {
+        $headers = apache_request_headers();
         header('Content-Type: application/json');
+        header('ucp-agent: ' . ($headers['ucp-agent'] ?? 'unknown'));
+        header('idempotency-key: ' . ($headers['idempotency-key'] ?? 'unknown'));
+        header('request-id: ' . ($headers['request-id'] ?? 'unknown'));
 
         // Get public key from configuration
         $publicKeyPem = Configuration::get('UCP_PUBLIC_KEY');
