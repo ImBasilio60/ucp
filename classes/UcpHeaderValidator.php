@@ -127,12 +127,18 @@ class UcpHeaderValidator
     {
         $headers = $this->extracted_headers;
 
+        // Mask idempotency key for security - show only first 8 characters
+        $idempotency_key = $headers['idempotency-key'] ?? 'unknown';
+        if ($idempotency_key !== 'unknown' && strlen($idempotency_key) > 8) {
+            $idempotency_key = substr($idempotency_key, 0, 8) . '...';
+        }
+
         $log_data = [
             'timestamp' => date('c'),
             'request_id' => $headers['request-id'] ?? 'unknown',
             'ucp_agent' => $headers['ucp-agent'] ?? 'unknown',
             'endpoint' => $endpoint,
-            'idempotency_key' => $headers['idempotency-key'] ?? 'unknown'
+            'idempotency_key' => $idempotency_key
         ];
 
         // Log to PrestaShop logger
