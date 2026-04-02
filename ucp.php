@@ -4,6 +4,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once _PS_MODULE_DIR_ . 'ucp/classes/UcpOAuthConfig.php';
+
 class Ucp extends Module
 {
     public function __construct()
@@ -17,7 +19,7 @@ class Ucp extends Module
         parent::__construct();
 
         $this->displayName = 'UCP endpoint';
-        $this->description = 'Expose /.well-known/ucp endpoint';
+        $this->description = 'Expose /.well-known/ucp endpoint with OAuth metadata';
     }
 
     public function install()
@@ -46,6 +48,11 @@ class Ucp extends Module
         // Read public key
         $publicKeyPem = file_get_contents($publicKeyPath);
         
+        // Initialize OAuth configuration defaults
+        if (!UcpOAuthConfig::installDefaults()) {
+            return false;
+        }
+        
         if (!parent::install() ||
             !$this->registerHook('moduleRoutes') ||
             !Configuration::updateValue('UCP_PUBLIC_KEY', $publicKeyPem)
@@ -60,6 +67,9 @@ class Ucp extends Module
     {
         // Clean up configuration
         Configuration::deleteByName('UCP_PUBLIC_KEY');
+        
+        // Clean up OAuth configuration
+        UcpOAuthConfig::uninstall();
         
         return parent::uninstall();
     }
